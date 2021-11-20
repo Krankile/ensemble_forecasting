@@ -1,7 +1,7 @@
 from torch.utils.data import Dataset
 import pandas as pd
 
-from utils.feature_extractor import feature_extractor
+from ..utils.feature_extractor import feature_extractor
 
 
 class M4Data(Dataset):

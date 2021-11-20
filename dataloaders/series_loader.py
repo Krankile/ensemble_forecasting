@@ -2,7 +2,7 @@ from multiprocessing import cpu_count
 
 from torch.utils.data import DataLoader
 
-from datasets.m4_series import M4Data
+from ..datasets.m4_series import M4Data
 
 
 def get_dataloaders(train_path, val_path, batch_size, manual_or_auto_toggle, normalize="standard"):

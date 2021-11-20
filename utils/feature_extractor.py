@@ -1,6 +1,6 @@
 import torch
 
-from utils.scalers import scalers
+from ..utils.scalers import scalers
 
 
 def feature_extractor(df, manual_auto_tp_toggle, normalization):
