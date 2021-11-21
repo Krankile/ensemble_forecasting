@@ -166,3 +166,9 @@ class RecurrentAutoencoderV3(nn.Module):
         x = self.decoder(x, lens)
 
         return x
+
+
+model_versions = {
+    "RecurrentAutoencoderV2": RecurrentAutoencoderV2,
+    "RecurrentAutoencoderV3": RecurrentAutoencoderV3,
+}
