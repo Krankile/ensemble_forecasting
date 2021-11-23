@@ -242,4 +242,5 @@ class RecurrentAutoencoderV4(nn.Module):
 model_versions = {
     "RecurrentAutoencoderV2": RecurrentAutoencoderV2,
     "RecurrentAutoencoderV3": RecurrentAutoencoderV3,
+    "RecurrentAutoencoderV4": RecurrentAutoencoderV4,
 }
