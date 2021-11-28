@@ -1,0 +1,97 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Download the Rdata-files from here: https://github.com/pmontman/M4metaresults/releases/tag/v0.0.0.9000
+
+```{r}
+library(feather)
+```
+
+
+```{r}
+load("meta_M4.rda")
+load("submission_M4.rda")
+```
+
+# Get statistical feeatures from the training data
+
+```{r}
+feat_names <- names(meta_M4[[1]]$features)
+n_feats <- length(feat_names)
+stats_mtx <- matrix(nrow = length(meta_M4), ncol = n_feats)
+rownames <- vector(length = length(meta_M4))
+```
+
+
+```{r}
+for (i in 1:length(meta_M4)) {
+  feat <- meta_M4[[i]]$features
+  rownames[i] <- meta_M4[[i]]$st
+  
+  for (j in 1:n_feats) {
+   stats_mtx[i, j] <- as.numeric(feat[feat_names[j]])
+  }
+}
+```
+
+
+
+```{r}
+colnames(stats_mtx) <- feat_names
+rownames(stats_mtx) <- rownames
+
+stats_df <- data.frame(stats_mtx)
+
+write_feather(stats_df, "stats_features_traval.feather")
+```
+
+
+```{bash}
+# TODO delete key before committing
+wandb login <API KEY>
+```
+
+
+```{bash}
+wandb init --entity krankile --project data-processing -m online
+wandb artifact put -n stats_features_traval -t dataset -d "Statistical features for the training set" stats_features_traval.feather
+```
+
+
+# Get statistical feeatures from the test data
+
+```{r}
+stats_mtx <- matrix(nrow = length(submission_M4), ncol = n_feats)
+rownames <- vector(length = length(submission_M4))
+```
+
+
+```{r}
+for (i in 1:length(submission_M4)) {
+  feat <- submission_M4[[i]]$features
+  rownames[i] <- submission_M4[[i]]$st
+  
+  for (j in 1:n_feats) {
+   stats_mtx[i, j] <- as.numeric(feat[feat_names[j]])
+  }
+}
+```
+
+
+
+```{r}
+colnames(stats_mtx) <- feat_names
+rownames(stats_mtx) <- rownames
+
+stats_df <- data.frame(stats_mtx)
+
+write_feather(stats_df, "stats_features_test.feather")
+```
+
+
+```{bash}
+wandb init --entity krankile --project data-processing -m online
+wandb artifact put -n stats_features_test -t dataset -d "Statistical features for the test set" stats_features_test.feather
+```

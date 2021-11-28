@@ -1,0 +1,132 @@
+---
+title: "Naive2 MASE & sMAPE"
+output: html_notebook
+---
+
+```{r}
+library(forecast)
+library(feather)
+```
+
+
+```{r}
+naive2 <- function(input, fh){
+  #Used to estimate the statistical benchmarks of the M4 competition
+  
+  #Estimate seasonally adjusted time series
+  ppy <- frequency(input)
+  ST <- F
+  
+  if (ppy>1){ ST <- SeasonalityTest(input,ppy) }
+  if (ST==T){
+    Dec <- decompose(input,type="multiplicative")
+    des_input <- input/Dec$seasonal
+    SIout <- head(rep(Dec$seasonal[(length(Dec$seasonal)-ppy+1):length(Dec$seasonal)], fh), fh)
+  }else{
+    des_input <- input
+    SIout <- rep(1, fh)
+  }
+  
+  ff <- naive(des_input, h=fh)$mean*SIout #Naive2
+  
+  return(ff)
+}
+```
+
+```{r}
+SeasonalityTest <- function(input, ppy){
+  #Used to determine whether a time series is seasonal
+  tcrit <- 1.645
+  if (length(input)<3*ppy){
+    test_seasonal <- FALSE
+  }else{
+    xacf <- acf(input, plot = FALSE)$acf[-1, 1, 1]
+    clim <- tcrit/sqrt(length(input)) * sqrt(cumsum(c(1, 2 * xacf^2)))
+    test_seasonal <- ( abs(xacf[ppy]) > clim[ppy] )
+    
+    if (is.na(test_seasonal)==TRUE){ test_seasonal <- FALSE }
+  }
+  
+  return(test_seasonal)
+}
+```
+
+
+```{r}
+smape_cal <- function(outsample, forecasts){
+  #Used to estimate sMAPE
+  outsample <- as.numeric(outsample) ; forecasts<-as.numeric(forecasts)
+  smape <- (abs(outsample-forecasts)*200)/(abs(outsample)+abs(forecasts))
+  return(smape)
+}
+
+mase_cal <- function(insample, outsample, forecasts){
+  #Used to estimate MASE
+  frq <- frequency(insample)
+  forecastsNaiveSD <- rep(NA,frq)
+  for (j in (frq+1):length(insample)){
+    forecastsNaiveSD <- c(forecastsNaiveSD, insample[j-frq])
+  }
+  masep<-mean(abs(insample-forecastsNaiveSD),na.rm = TRUE)
+  
+  outsample <- as.numeric(outsample) ; forecasts <- as.numeric(forecasts)
+  mase <- (abs(outsample-forecasts))/masep
+  return(mase)
+}
+
+```
+
+```{r}
+maxh <- 0
+idxs <- c()
+
+for (r in meta_M4) {
+  maxh <- max(maxh, r$h)
+  idxs <- append(idxs, r$st)
+}
+```
+
+```{r}
+columns <- c("naive2_smape", "naive2_mase")
+
+outmtx <- matrix(nrow = length(idxs), ncol = length(columns), dimnames = list(idxs, columns))
+```
+
+
+```{r}
+for (r in meta_M4) {
+  insample <- r$x
+  outsample <- r$xx
+  fh <- r$h
+  ff <- naive2(insample, fh)
+  smape <- mean(smape_cal(outsample, ff))
+  mase <- mean(mase_cal(insample, outsample, ff))
+  
+  outmtx[r$st, "naive2_smape"] <- smape
+  outmtx[r$st, "naive2_mase"] <- mase
+}
+```
+
+
+```{r}
+df <- data.frame(outmtx)
+df <- cbind(st = rownames(df), df)
+write.csv(outmtx, file = "naive_smape_mase.csv")
+write_feather(df, "naive_smape_mase.feather")
+```
+
+```{r}
+arima_outsample <- meta_M4[[1]]$ff[1,]
+insample <- meta_M4[[1]]$x
+fh <- meta_M4[[1]]$h
+mean(mase_cal(insample, arima_outsample, fh))
+```
+
+```{r}
+i <- 3000
+
+meta_M4[[i]]$period
+levels(meta_M4[[i]]$period)
+as.numeric(meta_M4[[i]]$period)
+```
+
