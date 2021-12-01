@@ -3,16 +3,12 @@ import torch
 from ..utils.scalers import scalers
 
 
-def feature_extractor(df, manual_auto_tp_toggle, normalization):
+def feature_extractor(df, manual_auto_tp_toggle, normalization, n_models):
+
     batch_size = df.shape[0]
 
-    mask = []
-    for h in df.h:
-        mask.append([1]*int(h) + [0]*(48-int(h)))
-    mask = torch.BoolTensor(mask)
-
     # Get forecasts
-    forecasts = df.loc[:, "auto_arima_forec_0":"snaive_forec_47"]
+    forecasts = df.loc[:, "auto_arima_forec_0":"quant_99_reg_47"]
 
     # Get feature inputs
     if manual_auto_tp_toggle == "":
@@ -38,8 +34,7 @@ def feature_extractor(df, manual_auto_tp_toggle, normalization):
 
     # Get actuals
     actuals = df.loc[:, "actual_0":"actual_47"].to_numpy()
-    del df
-    forecasts = forecasts.to_numpy().reshape((batch_size, 9, 48)).swapaxes(1, 2)
+    forecasts = forecasts.to_numpy().reshape(
+        (batch_size, n_models, 48)).swapaxes(1, 2)
 
-    # TODO: This is hard coded to (9,48)
-    return (inputs_cat, emb_dims), inputs_normalized, forecasts, actuals, mask
+    return (inputs_cat, emb_dims), inputs_normalized, forecasts, actuals
