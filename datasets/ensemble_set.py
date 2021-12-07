@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from torch.utils.data import Dataset
 
-from .feature_extractor import feature_extractor
+from ..datasets.feature_extractor import feature_extractor
 
 
 class M4EnsembleData(Dataset):
