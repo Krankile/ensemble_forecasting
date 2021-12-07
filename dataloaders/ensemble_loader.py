@@ -2,7 +2,7 @@ from os import cpu_count
 
 from torch.utils.data import DataLoader
 
-from datasets.ensemble_set import M4EnsembleData
+from ..datasets.ensemble_set import M4EnsembleData
 
 
 def ensemble_dataloaders(
