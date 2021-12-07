@@ -1,10 +1,11 @@
 import pandas as pd
+import numpy as np
 from torch.utils.data import Dataset
 
 from ..utils.feature_extractor import feature_extractor
 
 
-class M4Data(Dataset):
+class M4EnsembleData(Dataset):
 
     def __init__(self, meta_path, loss_path, manual_or_auto_toggle, n_models, type_of_normalization="standard"):
         meta_df = pd.read_feather(meta_path).set_index(
