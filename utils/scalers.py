@@ -6,5 +6,3 @@ scalers = {
     "standard": StandardScaler(),
 }
 
-
-__all__ = [scalers]
