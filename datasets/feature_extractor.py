@@ -8,7 +8,7 @@ def feature_extractor(df, manual_auto_tp_toggle, normalization, n_models):
     batch_size = df.shape[0]
 
     # Get forecasts
-    forecasts = df.loc[:, "auto_arima_forec_0":"quant_99_reg_47"]
+    forecasts = df.loc[:, "auto_arima_0":"quant_99_reg_47"]
 
     # Get feature inputs
     if manual_auto_tp_toggle == "":
