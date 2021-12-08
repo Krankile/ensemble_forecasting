@@ -33,7 +33,7 @@ def feature_extractor(df, manual_auto_tp_toggle, normalization, n_models):
     inputs_normalized = scaler.fit_transform(inputs.to_numpy())
 
     # Get actuals
-    actuals = df.loc[:, "actual_0":"actual_47"].to_numpy()
+    actuals = df.loc[:, "actuals_0":"actuals_47"].to_numpy()
     forecasts = forecasts.to_numpy().reshape(
         (batch_size, n_models, 48)).swapaxes(1, 2)
 
