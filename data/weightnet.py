@@ -80,12 +80,13 @@ def ensemble_loaders(
     n_models=9,
     normalize="standard",
     cpus=None,
+    training=True,
 ):
     cpus = cpus if cpus else cpu_count()
     print(f"CPU count: {cpus}")
     data1 = M4EnsembleData(path1, manual_or_auto_toggle, n_models, normalize)
     loader1 = DataLoader(data1, batch_size=batch_size,
-                         shuffle=True, num_workers=cpus, drop_last=True)
+                         shuffle=training, num_workers=cpus, drop_last=training)
 
     if path2:
         data2 = M4EnsembleData(
