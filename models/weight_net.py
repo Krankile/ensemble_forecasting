@@ -1,8 +1,7 @@
-from os import utime
 import torch
 from torch import nn
 
-from ..utils.activations import activations
+from ..utils import activations
 
 class WeightNetV3(nn.Module):
 
