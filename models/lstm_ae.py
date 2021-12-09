@@ -239,7 +239,7 @@ class RecurrentAutoencoderV4(nn.Module):
         return x
 
 
-model_versions = {
+lstm_autoencoders = {
     "RecurrentAutoencoderV2": RecurrentAutoencoderV2,
     "RecurrentAutoencoderV3": RecurrentAutoencoderV3,
     "RecurrentAutoencoderV4": RecurrentAutoencoderV4,

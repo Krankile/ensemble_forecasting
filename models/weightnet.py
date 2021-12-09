@@ -40,3 +40,8 @@ class WeightNetV3(nn.Module):
         x = self.fc(x)
         x = self.softmax(x)
         return x
+
+
+weightnets = {
+    "WeightNetV3": WeightNetV3,
+}
