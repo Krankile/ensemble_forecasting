@@ -50,7 +50,7 @@ class AutoEncoderData(Dataset):
 
 def autoencoder_loaders(run, paths1, paths2=None, cpus=None):
     conf = run.config
-    cpus = cpus if cpus else cpu_count()
+    cpus = cpus or cpu_count()
 
     print(f"Using {cpus} CPUs in dataloaders")
     seq_len, num_features = conf.maxlen, 1

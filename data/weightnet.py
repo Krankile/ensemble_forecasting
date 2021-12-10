@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader, Dataset
 from ..utils.scalers import scalers
 
 
-def feature_extractor(df, manual_auto_tp_toggle, normalization, n_models):
+def feature_extractor(df, feature_set, n_models, normalization):
 
     batch_size = df.shape[0]
 
@@ -16,12 +16,12 @@ def feature_extractor(df, manual_auto_tp_toggle, normalization, n_models):
     forecasts = df.loc[:, "auto_arima_0":"quant_99_reg_47"]
 
     # Get feature inputs
-    if manual_auto_tp_toggle == "":
+    if feature_set == "":
         raise Exception(
             "Manual_or_auto_toggle needs to cointain either m or a for input to be non-empty")
 
-    inputs_start = "x_acf1" if "m" in manual_auto_tp_toggle.lower() else "lstm_0"
-    inputs_end = "lstm_31" if "a" in manual_auto_tp_toggle.lower() else "series_length"
+    inputs_start = "x_acf1" if "m" in feature_set.lower() else "lstm_0"
+    inputs_end = "lstm_31" if "a" in feature_set.lower() else "series_length"
 
     inputs = df.loc[:, inputs_start:inputs_end]
 
@@ -47,9 +47,11 @@ def feature_extractor(df, manual_auto_tp_toggle, normalization, n_models):
 
 class M4EnsembleData(Dataset):
 
-    def __init__(self, meta_path, manual_or_auto_toggle, n_models, type_of_normalization="standard"):
+    def __init__(self, meta_path, feature_set, n_models, subset, normalization="standard"):
         meta_df = pd.read_feather(meta_path).set_index(
-            "m4id").replace(np.nan, 0)
+            "m4id").replace(np.nan, 0).loc[subset]
+
+        print(f"Loaded df of shape {meta_df.shape}")
 
         self.h = meta_df["h"].astype(np.int16)
         self.divs = meta_df["mase_divisor"]
@@ -60,7 +62,7 @@ class M4EnsembleData(Dataset):
         self.length = meta_df.shape[0]
 
         (self.cats, emb_dims), self.input, self.forecast, self.actuals = feature_extractor(
-            meta_df, manual_or_auto_toggle, type_of_normalization, n_models)
+            meta_df, feature_set, n_models, normalization)
 
         self.num_cont = self.input.shape[1]
         self.emb_dims = emb_dims
@@ -73,24 +75,32 @@ class M4EnsembleData(Dataset):
 
 
 def ensemble_loaders(
-    path1,
-    path2=None,
+    datapath,
+    splitpath=None,
     batch_size=512,
-    manual_or_auto_toggle="ma",
+    feature_set="ma",
     n_models=9,
     normalize="standard",
     cpus=None,
     training=True,
 ):
-    cpus = cpus if cpus else cpu_count()
+    cpus = cpus or cpu_count()
     print(f"CPU count: {cpus}")
-    data1 = M4EnsembleData(path1, manual_or_auto_toggle, n_models, normalize)
+
+    train_idxs, val_idxs = slice(None, None), None
+
+    if splitpath:
+        split = pd.read_feather(splitpath).set_index("m4id")
+        train_idxs = split[split.val == False].index
+        val_idxs = split[split.val == True].index
+
+    data1 = M4EnsembleData(datapath, feature_set, n_models, normalize, subset=train_idxs)
     loader1 = DataLoader(data1, batch_size=batch_size,
                          shuffle=training, num_workers=cpus, drop_last=training)
 
-    if path2:
+    if val_idxs:
         data2 = M4EnsembleData(
-            path2, manual_or_auto_toggle, n_models, normalize)
+            datapath, feature_set, n_models, normalize, subset=val_idxs)
         loader2 = DataLoader(data2, batch_size=batch_size,
                              shuffle=False, num_workers=cpus)
 
