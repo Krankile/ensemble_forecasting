@@ -14,8 +14,13 @@ def owa(pred, actual, *args):
     _, n_smape, n_mase, __ = args
     return 0.5*(torch.div(smape(pred, actual, *args), n_smape.mean()) + torch.div(mase(pred, actual, *args), n_mase.mean()))
 
+def triad_loss(pred, actual, *args):
+    return owa(pred, actual, *args), smape(pred, actual, *args), mase(pred, actual, *args)
+
+
 loss_functions = {
     "smape": smape,
     "mase": mase,
     "owa": owa,
+    "triad": triad_loss,
 }
