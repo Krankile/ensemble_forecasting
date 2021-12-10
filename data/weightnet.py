@@ -47,7 +47,7 @@ def feature_extractor(df, feature_set, n_models, normalization):
 
 class M4EnsembleData(Dataset):
 
-    def __init__(self, meta_path, feature_set, n_models, subset, normalization="standard"):
+    def __init__(self, meta_path, feature_set, n_models, subset, normalize="standard"):
         meta_df = pd.read_feather(meta_path).set_index(
             "m4id").replace(np.nan, 0).loc[subset]
 
@@ -62,7 +62,7 @@ class M4EnsembleData(Dataset):
         self.length = meta_df.shape[0]
 
         (self.cats, emb_dims), self.input, self.forecast, self.actuals = feature_extractor(
-            meta_df, feature_set, n_models, normalization)
+            meta_df, feature_set, n_models, normalize)
 
         self.num_cont = self.input.shape[1]
         self.emb_dims = emb_dims
