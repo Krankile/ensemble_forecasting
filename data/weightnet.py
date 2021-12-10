@@ -94,13 +94,13 @@ def ensemble_loaders(
         train_idxs = split[split.val == False].index
         val_idxs = split[split.val == True].index
 
-    data1 = M4EnsembleData(datapath, feature_set, n_models, normalize, subset=train_idxs)
+    data1 = M4EnsembleData(datapath, feature_set, n_models, subset=train_idxs, normalize=normalize)
     loader1 = DataLoader(data1, batch_size=batch_size,
                          shuffle=training, num_workers=cpus, drop_last=training)
 
     if val_idxs:
         data2 = M4EnsembleData(
-            datapath, feature_set, n_models, normalize, subset=val_idxs)
+            datapath, feature_set, n_models, subset=val_idxs, normalize=normalize)
         loader2 = DataLoader(data2, batch_size=batch_size,
                              shuffle=False, num_workers=cpus)
 
