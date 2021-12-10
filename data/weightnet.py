@@ -98,7 +98,7 @@ def ensemble_loaders(
     loader1 = DataLoader(data1, batch_size=batch_size,
                          shuffle=training, num_workers=cpus, drop_last=training)
 
-    if val_idxs:
+    if val_idxs is not None:
         data2 = M4EnsembleData(
             datapath, feature_set, n_models, subset=val_idxs, normalize=normalize)
         loader2 = DataLoader(data2, batch_size=batch_size,
