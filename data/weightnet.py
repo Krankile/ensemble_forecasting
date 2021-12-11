@@ -5,10 +5,8 @@ import pandas as pd
 import torch
 from torch.utils.data import DataLoader, Dataset
 
-from ..utils.scalers import scalers
 
-
-def feature_extractor(df, feature_set, n_models, normalization):
+def feature_extractor(df, feature_set, n_models):
 
     batch_size = df.shape[0]
 
@@ -34,20 +32,17 @@ def feature_extractor(df, feature_set, n_models, normalization):
 
     inputs_cat = torch.as_tensor(inputs_cat.to_numpy(), dtype=torch.long)
 
-    scaler = scalers[normalization]
-    inputs_normalized = scaler.fit_transform(inputs.to_numpy())
-
     # Get actuals
     actuals = df.loc[:, "actuals_0":"actuals_47"].to_numpy()
     forecasts = forecasts.to_numpy().reshape(
         (batch_size, n_models, 48)).swapaxes(1, 2)
 
-    return (inputs_cat, emb_dims), inputs_normalized, forecasts, actuals
+    return (inputs_cat, emb_dims), inputs, forecasts, actuals
 
 
 class M4EnsembleData(Dataset):
 
-    def __init__(self, meta_path, feature_set, n_models, subset, normalize="standard"):
+    def __init__(self, meta_path, feature_set, n_models, subset):
         if isinstance(meta_path, pd.DataFrame):
             meta_df = meta_path.copy()
         elif isinstance(meta_path, str):
@@ -67,7 +62,7 @@ class M4EnsembleData(Dataset):
         self.length = meta_df.shape[0]
 
         (self.cats, emb_dims), self.input, self.forecast, self.actuals = feature_extractor(
-            meta_df, feature_set, n_models, normalize)
+            meta_df, feature_set, n_models)
 
         self.num_cont = self.input.shape[1]
         self.emb_dims = emb_dims
@@ -85,7 +80,6 @@ def ensemble_loaders(
     batch_size=512,
     feature_set="ma",
     n_models=9,
-    normalize="standard",
     cpus=None,
     training=True,
 ):
@@ -100,13 +94,13 @@ def ensemble_loaders(
         val_idxs = split[split.val == True].index
 
     data1 = M4EnsembleData(datapath, feature_set, n_models,
-                           subset=train_idxs, normalize=normalize)
+                           subset=train_idxs)
     loader1 = DataLoader(data1, batch_size=batch_size,
                          shuffle=training, num_workers=cpus, drop_last=training)
 
     if val_idxs is not None:
         data2 = M4EnsembleData(
-            datapath, feature_set, n_models, subset=val_idxs, normalize=normalize)
+            datapath, feature_set, n_models, subset=val_idxs)
         loader2 = DataLoader(data2, batch_size=batch_size,
                              shuffle=False, num_workers=cpus)
 
@@ -128,12 +122,12 @@ def ensemble_loaders_kfold(
     cpus = cpus or cpu_count()
     print(f"CPU count: {cpus}")
 
-    data1 = M4EnsembleData(data, feature_set, n_models, normalize=normalize)
+    data1 = M4EnsembleData(data, feature_set, n_models)
     loader1 = DataLoader(data1, batch_size=batch_size,
                          shuffle=training, num_workers=cpus, drop_last=training)
 
     data2 = M4EnsembleData(
-        val, feature_set, n_models, normalize=normalize)
+        val, feature_set, n_models)
     loader2 = DataLoader(data2, batch_size=batch_size,
                          shuffle=False, num_workers=cpus)
 
