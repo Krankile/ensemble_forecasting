@@ -44,7 +44,7 @@ def feature_extractor(df, feature_set, n_models):
 
 class M4EnsembleData(Dataset):
 
-    def __init__(self, meta_path, feature_set, n_models, subset):
+    def __init__(self, meta_path, feature_set, n_models, subset=None):
         if isinstance(meta_path, pd.DataFrame):
             meta_df = meta_path.copy()
         elif isinstance(meta_path, str):
