@@ -122,3 +122,27 @@ def ensemble_loaders(
         return loader1, loader2, data1.emb_dims, data1.num_cont, data1.length
 
     return loader1, data1.emb_dims, data1.num_cont, data1.length
+
+
+def ensemble_loaders_kfold(
+    data,
+    val,
+    batch_size=512,
+    feature_set="ma",
+    n_models=9,
+    cpus=None,
+    training=True,
+):
+    cpus = cpus or cpu_count()
+    print(f"CPU count: {cpus}")
+
+    data1 = M4EnsembleData(data, feature_set, n_models)
+    loader1 = DataLoader(data1, batch_size=batch_size,
+                         shuffle=training, num_workers=cpus, drop_last=training)
+
+    data2 = M4EnsembleData(
+        val, feature_set, n_models)
+    loader2 = DataLoader(data2, batch_size=batch_size,
+                         shuffle=False, num_workers=cpus)
+
+    return loader1, loader2, data1.emb_dims, data1.num_cont, data1.length
