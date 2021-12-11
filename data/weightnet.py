@@ -16,16 +16,19 @@ def feature_extractor(df, feature_set, n_models):
     # Get feature inputs
     if feature_set == "":
         raise Exception(
-            "Manual_or_auto_toggle needs to cointain either m or a for input to be non-empty")
+            "Manual_or_auto_toggle needs to cointain either m or a for input to be non-empty"
+        )
 
     inputs_start = "x_acf1" if "m" in feature_set.lower() else "lstm_0"
     inputs_end = "lstm_31" if "a" in feature_set.lower() else "series_length"
 
     inputs = df.loc[:, inputs_start:inputs_end]
 
-    inputs_cat = df.loc[:, ['type', 'period']].astype("category")
-    emb_dims = [(x, min(x // 2, 50))
-                for x in map(lambda y: len(inputs_cat[y].cat.categories), inputs_cat)]
+    inputs_cat = df.loc[:, ["type", "period"]].astype("category")
+    emb_dims = [
+        (x, min(x // 2, 50))
+        for x in map(lambda y: len(inputs_cat[y].cat.categories), inputs_cat)
+    ]
 
     for col in inputs_cat:
         inputs_cat[col] = inputs_cat[col].cat.codes
@@ -34,8 +37,7 @@ def feature_extractor(df, feature_set, n_models):
 
     # Get actuals
     actuals = df.loc[:, "actuals_0":"actuals_47"].to_numpy()
-    forecasts = forecasts.to_numpy().reshape(
-        (batch_size, n_models, 48)).swapaxes(1, 2)
+    forecasts = forecasts.to_numpy().reshape((batch_size, n_models, 48)).swapaxes(1, 2)
 
     return (inputs_cat, emb_dims), inputs, forecasts, actuals
 
@@ -46,10 +48,16 @@ class M4EnsembleData(Dataset):
         if isinstance(meta_path, pd.DataFrame):
             meta_df = meta_path.copy()
         elif isinstance(meta_path, str):
-            meta_df = pd.read_feather(meta_path).set_index(
-                "m4id").replace(np.nan, 0).loc[subset]
+            meta_df = (
+                pd.read_feather(meta_path)
+                .set_index("m4id")
+                .replace(np.nan, 0)
+                .loc[subset]
+            )
         else:
-            raise Exception("Only pandas DataFrame or path to a feather file legal arguments")
+            raise Exception(
+                "Only pandas DataFrame or path to a feather file legal arguments"
+            )
 
         print(f"Loaded df of shape {meta_df.shape}")
 
@@ -71,7 +79,16 @@ class M4EnsembleData(Dataset):
         return self.length
 
     def __getitem__(self, idx):
-        return self.cats[idx], self.input[idx], self.forecast[idx], self.actuals[idx], self.divs[idx], self.n_smape[idx], self.n_mase[idx], self.h[idx]
+        return (
+            self.cats[idx],
+            self.input[idx],
+            self.forecast[idx],
+            self.actuals[idx],
+            self.divs[idx],
+            self.n_smape[idx],
+            self.n_mase[idx],
+            self.h[idx],
+        )
 
 
 def ensemble_loaders(
