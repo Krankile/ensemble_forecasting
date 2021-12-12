@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from torch.nn.utils.rnn import pad_packed_sequence
+from .colors import main, main2
 
 
 def plot_examples(figurepath,
@@ -17,13 +18,12 @@ def plot_examples(figurepath,
 
     def plot(ax, d1, d2):
         ax.xaxis.set_major_locator(plt.MaxNLocator(3))
-        ax.plot(d1, label=f'Original')
-        ax.plot(d2, label=f'Reconstructed')
+        ax.plot(d1, label=f'Original', color=main)
+        ax.plot(d2, label=f'Reconstructed', color=main2)
         ax.legend()
 
     data2 = pad_packed_sequence(model(example_packed, lens), batch_first=True, total_length=conf.maxlen)[0].detach().cpu().numpy()
 
-    plt.style.use('seaborn-pastel')
     figs = np.array(range(rows*cols)).reshape((rows, cols))
     fig, axs = plt.subplots(nrows=rows, ncols=cols, figsize=size)
     meta = {
