@@ -44,7 +44,7 @@ def feature_extractor(df, feature_set, n_models):
 
 class M4EnsembleData(Dataset):
 
-    def __init__(self, meta_path, feature_set, n_models, subset=None):
+    def __init__(self, meta_path, feature_set, n_models, subset=None, verbose=True):
         if isinstance(meta_path, pd.DataFrame):
             meta_df = meta_path.copy()
         elif isinstance(meta_path, str):
@@ -59,7 +59,7 @@ class M4EnsembleData(Dataset):
                 "Only pandas DataFrame or path to a feather file legal arguments"
             )
 
-        print(f"Loaded df of shape {meta_df.shape}")
+        if verbose: print(f"Loaded df of shape {meta_df.shape}")
 
         self.h = meta_df["h"].astype(np.int16)
         self.divs = meta_df["mase_divisor"]
@@ -97,9 +97,10 @@ def ensemble_loaders(
     n_models=9,
     cpus=None,
     training=True,
+    verbose=True,
 ):
     cpus = cpus or cpu_count()
-    print(f"CPU count: {cpus}")
+    if verbose: print(f"CPU count: {cpus}")
 
     train_idxs, val_idxs = slice(None, None), None
 
@@ -109,13 +110,13 @@ def ensemble_loaders(
         val_idxs = split[split.val == True].index
 
     data1 = M4EnsembleData(datapath, feature_set, n_models,
-                           subset=train_idxs)
+                           subset=train_idxs, verbose=verbose)
     loader1 = DataLoader(data1, batch_size=batch_size,
                          shuffle=training, num_workers=cpus, drop_last=training)
 
     if val_idxs is not None:
         data2 = M4EnsembleData(
-            datapath, feature_set, n_models, subset=val_idxs)
+            datapath, feature_set, n_models, subset=val_idxs, verbose=verbose)
         loader2 = DataLoader(data2, batch_size=batch_size,
                              shuffle=False, num_workers=cpus)
 
