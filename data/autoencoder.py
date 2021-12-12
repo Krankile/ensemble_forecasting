@@ -10,10 +10,16 @@ from ..utils import normalizers
 
 class AutoEncoderData(Dataset):
     def __init__(self, paths, maxlen=2_000, nexamples=None, normalize="normal"):
-        series = pd.read_feather(paths["series"]).set_index(
-            "m4id").iloc[:nexamples, :]
-        self.info = pd.read_feather(paths["info"]).set_index(
-            "m4id").iloc[:nexamples, :]
+        if isinstance(paths["series"], pd.DataFrame):
+            series = paths["series"].iloc[:nexamples, :]
+            self.info = paths["info"].iloc[:nexamples, :]
+        elif isinstance(paths["series"], str):
+            series = pd.read_feather(paths["series"]).set_index(
+                "m4id").iloc[:nexamples, :]
+            self.info = pd.read_feather(paths["info"]).set_index(
+                "m4id").iloc[:nexamples, :]
+        else:
+            raise Exception("Invalid type of data")
 
         self.maxlen = maxlen
         self.normalize = normalize
@@ -56,13 +62,13 @@ def autoencoder_loaders(run, paths1, paths2=None, cpus=None):
     seq_len, num_features = conf.maxlen, 1
 
     data1 = AutoEncoderData(paths1, maxlen=conf.maxlen,
-                            nexamples=conf.n_train, normalize=conf.normalize_data)
+                            nexamples=conf.get("n_train"), normalize=conf.normalize_data)
     loader1 = DataLoader(data1, batch_size=conf.batch_size,
                          shuffle=True, num_workers=cpus, pin_memory=True)
 
     if paths2:
         data2 = AutoEncoderData(
-            paths2, maxlen=conf.maxlen, nexamples=conf.n_val, normalize=conf.normalize_data)
+            paths2, maxlen=conf.maxlen, nexamples=conf.conf.get("n_val"), normalize=conf.normalize_data)
         loader2 = DataLoader(data2, batch_size=conf.batch_size,
                              shuffle=False, num_workers=cpus, pin_memory=True)
         return loader1, loader2, seq_len, num_features
