@@ -68,7 +68,7 @@ def autoencoder_loaders(run, paths1, paths2=None, cpus=None):
 
     if paths2:
         data2 = AutoEncoderData(
-            paths2, maxlen=conf.maxlen, nexamples=conf.conf.get("n_val"), normalize=conf.normalize_data)
+            paths2, maxlen=conf.maxlen, nexamples=conf.get("n_val"), normalize=conf.normalize_data)
         loader2 = DataLoader(data2, batch_size=conf.batch_size,
                              shuffle=False, num_workers=cpus, pin_memory=True)
         return loader1, loader2, seq_len, num_features
