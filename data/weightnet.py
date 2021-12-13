@@ -56,7 +56,7 @@ def feature_extractor(df, feature_set, n_models, standardize=True, scaler=None):
 
 class M4EnsembleData(Dataset):
 
-    def __init__(self, meta_path, feature_set, n_models, subset=None, verbose=True):
+    def __init__(self, meta_path, feature_set, n_models, subset=None, verbose=True, standardize=False, scaler=None):
         if isinstance(meta_path, pd.DataFrame):
             meta_df = meta_path.copy()
         elif isinstance(meta_path, str):
@@ -82,7 +82,7 @@ class M4EnsembleData(Dataset):
         self.length = meta_df.shape[0]
 
         (self.cats, self.emb_dims), self.input, self.forecast, self.actuals, scaler = feature_extractor(
-            meta_df, feature_set, n_models)
+            meta_df, feature_set, n_models, standardize=standardize, scaler=scaler)
 
         self.num_cont = self.input.shape[1]
 
