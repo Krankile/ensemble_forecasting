@@ -130,7 +130,7 @@ def ensemble_loaders(
                          shuffle=training, num_workers=cpus, drop_last=training)
 
     if val_idxs is not None:
-        data2, _ = M4EnsembleData(
+        data2 = M4EnsembleData(
             datapath, feature_set, n_models, subset=val_idxs, verbose=verbose, scaler=data1.scaler)
         loader2 = DataLoader(data2, batch_size=batch_size,
                              shuffle=False, num_workers=cpus)
