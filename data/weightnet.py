@@ -4,9 +4,18 @@ import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader, Dataset
+from sklearn.preprocessing import StandardScaler
 
 
-def feature_extractor(df, feature_set, n_models):
+def standardize(data, scaler=None):
+    if scaler is None:
+        scaler = StandardScaler().fit(data)
+
+    data = scaler.transform(data)
+    return data, scaler
+
+
+def feature_extractor(df, feature_set, n_models, standardize=True, scaler=None):
 
     batch_size = df.shape[0]
 
@@ -24,6 +33,9 @@ def feature_extractor(df, feature_set, n_models):
 
     inputs = df.loc[:, inputs_start:inputs_end].to_numpy()
 
+    if standardize or scaler is not None:
+        inputs, scaler = standardize(inputs, scaler)
+
     inputs_cat = df.loc[:, ["type", "period"]].astype("category")
     emb_dims = [
         (x, min(x // 2, 50))
@@ -39,7 +51,7 @@ def feature_extractor(df, feature_set, n_models):
     actuals = df.loc[:, "actuals_0":"actuals_47"].to_numpy()
     forecasts = forecasts.to_numpy().reshape((batch_size, n_models, 48)).swapaxes(1, 2)
 
-    return (inputs_cat, emb_dims), inputs, forecasts, actuals
+    return (inputs_cat, emb_dims), inputs, forecasts, actuals, scaler
 
 
 class M4EnsembleData(Dataset):
@@ -69,10 +81,12 @@ class M4EnsembleData(Dataset):
         self.index = meta_df.index.values
         self.length = meta_df.shape[0]
 
-        (self.cats, self.emb_dims), self.input, self.forecast, self.actuals = feature_extractor(
+        (self.cats, self.emb_dims), self.input, self.forecast, self.actuals, scaler = feature_extractor(
             meta_df, feature_set, n_models)
 
         self.num_cont = self.input.shape[1]
+
+        return self, scaler
 
     def __len__(self):
         return self.length
@@ -98,6 +112,7 @@ def ensemble_loaders(
     cpus=None,
     training=True,
     verbose=True,
+    standardize=False,
 ):
     cpus = cpus or cpu_count()
     if verbose: print(f"CPU count: {cpus}")
@@ -109,14 +124,14 @@ def ensemble_loaders(
         train_idxs = split[split.val == False].index
         val_idxs = split[split.val == True].index
 
-    data1 = M4EnsembleData(datapath, feature_set, n_models,
-                           subset=train_idxs, verbose=verbose)
+    data1, scaler = M4EnsembleData(datapath, feature_set, n_models,
+                           subset=train_idxs, verbose=verbose, standarize=standardize)
     loader1 = DataLoader(data1, batch_size=batch_size,
                          shuffle=training, num_workers=cpus, drop_last=training)
 
     if val_idxs is not None:
-        data2 = M4EnsembleData(
-            datapath, feature_set, n_models, subset=val_idxs, verbose=verbose)
+        data2, _ = M4EnsembleData(
+            datapath, feature_set, n_models, subset=val_idxs, verbose=verbose, scaler=scaler)
         loader2 = DataLoader(data2, batch_size=batch_size,
                              shuffle=False, num_workers=cpus)
 
