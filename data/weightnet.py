@@ -85,8 +85,8 @@ class M4EnsembleData(Dataset):
             meta_df, feature_set, n_models, standardize=standardize, scaler=scaler)
 
         self.num_cont = self.input.shape[1]
+        self.scaler = scaler
 
-        return self, scaler
 
     def __len__(self):
         return self.length
@@ -124,14 +124,14 @@ def ensemble_loaders(
         train_idxs = split[split.val == False].index
         val_idxs = split[split.val == True].index
 
-    data1, scaler = M4EnsembleData(datapath, feature_set, n_models,
+    data1 = M4EnsembleData(datapath, feature_set, n_models,
                            subset=train_idxs, verbose=verbose, standardize=standardize)
     loader1 = DataLoader(data1, batch_size=batch_size,
                          shuffle=training, num_workers=cpus, drop_last=training)
 
     if val_idxs is not None:
         data2, _ = M4EnsembleData(
-            datapath, feature_set, n_models, subset=val_idxs, verbose=verbose, scaler=scaler)
+            datapath, feature_set, n_models, subset=val_idxs, verbose=verbose, scaler=data1.scaler)
         loader2 = DataLoader(data2, batch_size=batch_size,
                              shuffle=False, num_workers=cpus)
 
