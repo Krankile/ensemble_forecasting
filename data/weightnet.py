@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader, Dataset
 from sklearn.preprocessing import StandardScaler
 
 
-def standardize(data, scaler=None):
+def do_standardize(data, scaler=None):
     if scaler is None:
         scaler = StandardScaler().fit(data)
 
@@ -34,7 +34,7 @@ def feature_extractor(df, feature_set, n_models, standardize=False, scaler=None)
     inputs = df.loc[:, inputs_start:inputs_end].to_numpy()
 
     if standardize or scaler is not None:
-        inputs, scaler = standardize(inputs, scaler)
+        inputs, scaler = do_standardize(inputs, scaler)
 
     inputs_cat = df.loc[:, ["type", "period"]].astype("category")
     emb_dims = [
