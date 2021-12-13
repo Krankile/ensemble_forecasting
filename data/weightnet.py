@@ -15,7 +15,7 @@ def standardize(data, scaler=None):
     return data, scaler
 
 
-def feature_extractor(df, feature_set, n_models, standardize=True, scaler=None):
+def feature_extractor(df, feature_set, n_models, standardize=False, scaler=None):
 
     batch_size = df.shape[0]
 
@@ -125,7 +125,7 @@ def ensemble_loaders(
         val_idxs = split[split.val == True].index
 
     data1, scaler = M4EnsembleData(datapath, feature_set, n_models,
-                           subset=train_idxs, verbose=verbose, standarize=standardize)
+                           subset=train_idxs, verbose=verbose, standardize=standardize)
     loader1 = DataLoader(data1, batch_size=batch_size,
                          shuffle=training, num_workers=cpus, drop_last=training)
 
