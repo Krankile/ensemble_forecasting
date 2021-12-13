@@ -27,7 +27,7 @@ def _smape_analytics(pred, actual, *args):
 
 def _owa_anayltics(pred, actual, *args):
     _, n_smape, n_mase, __ = args
-    return 0.5*(torch.div(smape(pred, actual, *args), n_smape) + torch.div(mase(pred, actual, *args), n_mase))
+    return 0.5*(torch.div(_smape_analytics(pred, actual, *args), n_smape) + torch.div(_mase_analytics(pred, actual, *args), n_mase))
 
 def triad_loss_analytics(pred, actual, *args):
     return _owa_anayltics(pred, actual, *args), _smape_analytics(pred, actual, *args), _mase_analytics(pred, actual, *args)
