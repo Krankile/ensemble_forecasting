@@ -17,6 +17,20 @@ def owa(pred, actual, *args):
 def triad_loss(pred, actual, *args):
     return owa(pred, actual, *args), smape(pred, actual, *args), mase(pred, actual, *args)
 
+def _mase_analytics(pred, actual, *args):
+    divs, *_ = args
+    return torch.div(nn.functional.l1_loss(pred, actual, reduction="none").sum(1), divs)
+
+def _smape_analytics(pred, actual, *args):
+    *_, h = args
+    return 200 * torch.div(((pred - actual).abs() / (pred.abs() + actual.abs() + 1e-40)).sum(1), h)
+
+def _owa_anayltics(pred, actual, *args):
+    _, n_smape, n_mase, __ = args
+    return 0.5*(torch.div(_smape_analytics(pred, actual, *args), n_smape.mean()) + torch.div(_mase_analytics(pred, actual, *args), n_mase.mean()))
+
+def triad_loss_analytics(pred, actual, *args):
+    return _owa_anayltics(pred, actual, *args), _smape_analytics(pred, actual, *args), _mase_analytics(pred, actual, *args)
 
 loss_functions = {
     "smape": smape,
