@@ -54,7 +54,7 @@ class AutoEncoderData(Dataset):
         return x, lens, index
 
 
-def autoencoder_loaders(run, paths1, paths2=None, cpus=None):
+def autoencoder_loaders(run, paths1, paths2=None, cpus=None, batchsize=None):
     conf = run.config
     cpus = cpus or cpu_count()
 
@@ -63,13 +63,13 @@ def autoencoder_loaders(run, paths1, paths2=None, cpus=None):
 
     data1 = AutoEncoderData(paths1, maxlen=conf.maxlen,
                             nexamples=conf.get("n_train"), normalize=conf.normalize_data)
-    loader1 = DataLoader(data1, batch_size=conf.batch_size,
+    loader1 = DataLoader(data1, batch_size=(batchsize or conf.batch_size),
                          shuffle=True, num_workers=cpus, pin_memory=True)
 
     if paths2:
         data2 = AutoEncoderData(
             paths2, maxlen=conf.maxlen, nexamples=conf.get("n_val"), normalize=conf.normalize_data)
-        loader2 = DataLoader(data2, batch_size=conf.batch_size,
+        loader2 = DataLoader(data2, batch_size=(batchsize or conf.batch_size),
                              shuffle=False, num_workers=cpus, pin_memory=True)
         return loader1, loader2, seq_len, num_features
 
