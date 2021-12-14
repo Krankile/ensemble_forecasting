@@ -24,7 +24,7 @@ def do_standardize(data, scaler=None):
     return data, scaler
 
 
-def split(data, split):
+def split_traval(data, split):
     tra = data.loc[split[split.val == False].index]
     val = data.loc[split[split.val == True].index]
 
