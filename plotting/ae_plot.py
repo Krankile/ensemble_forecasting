@@ -40,10 +40,10 @@ def plot_examples(figurepath,
             idx += 1
 
     for i in range(rows):
-        axs[0][i].set_ylabel("Standardized value", fontize=secsize)
+        axs[0][i].set_ylabel("Standardized value", fontsize=secsize)
 
     for i in range(cols):
-        axs[-1][i].set_ylabel("Timestep", fontize=secsize)
+        axs[-1][i].set_ylabel("Timestep", fontsize=secsize)
 
     fig.tight_layout()
     fig.subplots_adjust(top=0.92)
