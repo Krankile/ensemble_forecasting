@@ -68,10 +68,10 @@ def get_loss(model, loader, device, loss="owa"):
     return np.mean(owas)
 
 
-def calculate_feature_importance(*, run, device, modelpath, tdqm=True):
+def calculate_feature_importance(*, run, device, test, final, modelpath, progess=True):
     conf = run.config
 
-    data = get_data(run, test=False, final=False)
+    data = get_data(run, test=test, final=final)
 
     get_loader = partial(ensemble_loaders,
                          batch_size=data.shape[0],
@@ -105,7 +105,7 @@ def calculate_feature_importance(*, run, device, modelpath, tdqm=True):
 
     cols = data.drop(columns=['n', 'h', 'mase_divisor', 'naive2_smape',
                      'naive2_mase']).loc[:, "type":"lstm_31"].columns
-    it = tqdm(cols) if tqdm else iter(cols)
+    it = tqdm(cols) if progess else iter(cols)
 
     results = defaultdict(list)
     for col in it:
