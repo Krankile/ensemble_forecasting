@@ -68,7 +68,7 @@ def get_loss(model, loader, device, loss="owa"):
     return np.mean(owas)
 
 
-def calculate_feature_importance(*, run, device, test, final, modelpath, progess=True):
+def calculate_feature_importance(*, run, device, test, final, modelpath, progress=True):
     conf = run.config
 
     data = get_data(run, test=test, final=final)
