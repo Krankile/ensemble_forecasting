@@ -18,9 +18,9 @@ def plot_examples(figurepath,
 
     def plot(ax, d1, d2):
         ax.xaxis.set_major_locator(plt.MaxNLocator(3))
-        ax.plot(d1, label=f'Original', color=main, fontsize=14)
-        ax.plot(d2, label=f'Reconstructed', color=main2, fontsize=14)
-        ax.legend()
+        ax.plot(d1, label=f'Original', color=main)
+        ax.plot(d2, label=f'Reconstructed', color=main2)
+        ax.legend(fontsize=14)
 
     data2 = pad_packed_sequence(model(example_packed, lens), batch_first=True, total_length=conf.maxlen)[0].detach().cpu().numpy()
 
