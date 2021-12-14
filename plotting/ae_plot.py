@@ -38,11 +38,8 @@ def plot_examples(figurepath,
             plot(ax, data1[r][:lens[r]], data2[r][:lens[r]])
             idx += 1
 
-    for i in range(rows):
-        axs[i][0].set_ylabel("Standardized value", fontsize=textsize)
-
-    for i in range(cols):
-        axs[-1][i].set_xlabel("Timestep", fontsize=textsize)
+    axs[rows // 2][0].set_ylabel("Standardized value", fontsize=textsize)
+    axs[-1][rows // 2].set_xlabel("Timestep", fontsize=textsize)
 
     fig.tight_layout()
     fig.subplots_adjust(top=0.92)
