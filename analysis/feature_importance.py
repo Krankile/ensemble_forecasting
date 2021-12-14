@@ -101,11 +101,11 @@ def calculate_feature_importance(*, run, device, test, final, modelpath, progres
     model = model.to(device).eval()
 
     # Run calculations
-    baseline = get_loss(model, loader)
+    baseline = get_loss(model, loader, device)
 
     cols = data.drop(columns=['n', 'h', 'mase_divisor', 'naive2_smape',
                      'naive2_mase']).loc[:, "type":"lstm_31"].columns
-    it = tqdm(cols) if progess else iter(cols)
+    it = tqdm(cols) if progress else iter(cols)
 
     results = defaultdict(list)
     for col in it:
@@ -114,6 +114,6 @@ def calculate_feature_importance(*, run, device, test, final, modelpath, progres
             cp[col] = shuffle(cp[col]).to_numpy()
 
             loader, *_ = get_loader(datapath=cp)
-            results[col].append(get_loss(model, loader) - baseline)
+            results[col].append(get_loss(model, loader, device) - baseline)
 
     return results
