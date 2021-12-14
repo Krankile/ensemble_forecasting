@@ -7,13 +7,13 @@ def art2df(run, arts, *, root="krankile/data-processing/"):
 
     for a in arts:
 
-        data = run.use_artifact(root + a); data.download()
+        data = run.use_artifact(root + a)
+        data.download()
         dfs.append(
             pd.read_feather(data.file()).set_index("m4id")
         )
 
     return dfs
-
 
 
 def do_standardize(data, scaler=None):
@@ -22,3 +22,10 @@ def do_standardize(data, scaler=None):
 
     data = scaler.transform(data)
     return data, scaler
+
+
+def split(data, split):
+    tra = data.loc[split[split.val == False].index]
+    val = data.loc[split[split.val == True].index]
+
+    return tra, val
