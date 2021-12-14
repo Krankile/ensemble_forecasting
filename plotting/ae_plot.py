@@ -18,26 +18,16 @@ def plot_examples(figurepath,
 
     def plot(ax, d1, d2):
         ax.xaxis.set_major_locator(plt.MaxNLocator(3))
-        ax.plot(d1, label=f'Original', color=main)
-        ax.plot(d2, label=f'Reconstructed', color=main2)
+        ax.plot(d1, label=f'Original', color=main, fontsize=14)
+        ax.plot(d2, label=f'Reconstructed', color=main2, fontsize=14)
         ax.legend()
 
     data2 = pad_packed_sequence(model(example_packed, lens), batch_first=True, total_length=conf.maxlen)[0].detach().cpu().numpy()
 
     figs = np.array(range(rows*cols)).reshape((rows, cols))
     fig, axs = plt.subplots(nrows=rows, ncols=cols, figsize=size)
-    meta = {
-        "epoch": epoch,
-        "ed": conf.embedding_dim,
-        "hd": conf.hidden_dim,
-        "drop": conf.dropout,
-        "opt": conf.optimizer,
-        "batch": conf.batch_size,
-        "maxlen": conf.maxlen,
-        "normal": conf.normalize_data,
-    }
 
-    fig.suptitle(f"Results on val data ({meta})", size=14)
+    fig.suptitle(f"Autoencoder reconstructions on val data", size=16)
 
     idx = 0
 
@@ -48,6 +38,8 @@ def plot_examples(figurepath,
 
     fig.tight_layout()
     fig.subplots_adjust(top=0.92)
+    plt.xticks(fontsize=14)
+    plt.yticks(fontsize=14)
 
     plt.savefig(figurepath)
     if not show:
