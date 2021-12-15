@@ -23,8 +23,8 @@ def plot_feature_importance(importances, *, savepath=None, useerror=None, show=T
         elif useerror == "se":
             err = {k: np.std(v) / np.sqrt(len(v)) for k, v in importances.items()}
 
-        lstm_err = [v for k, v in err if "lstm" in k]
-        stat_err = [v for k, v in err if "lstm" not in k]
+        lstm_err = [v for k, v in err.items() if "lstm" in k]
+        stat_err = [v for k, v in err.items() if "lstm" not in k]
 
 
     plt.figure(figsize=(ps.figwidth, figheight))
