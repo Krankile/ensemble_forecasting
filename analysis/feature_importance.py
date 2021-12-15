@@ -68,7 +68,7 @@ def get_loss(model, loader, device, loss="owa"):
     return np.mean(owas)
 
 
-def calculate_feature_importance(*, run, device, test, final, modelpath, progress=True):
+def calculate_feature_importance(*, run, device, test, final, modelpath, n_runs=1, progress=True):
     conf = run.config
 
     data = get_data(run, test=test, final=final)
@@ -109,7 +109,7 @@ def calculate_feature_importance(*, run, device, test, final, modelpath, progres
 
     results = defaultdict(list)
     for col in it:
-        for _ in range(1):
+        for _ in range(n_runs):
             cp = data.copy()
             cp[col] = shuffle(cp[col]).to_numpy()
 
