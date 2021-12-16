@@ -5,6 +5,7 @@ import pandas as pd
 import torch
 from torch.utils.data import DataLoader, Dataset
 from sklearn.preprocessing import StandardScaler
+from .feature_columns import feature_columns
 
 
 def do_standardize(data, scaler=None):
@@ -49,7 +50,8 @@ def feature_extractor(df, feature_set, n_models, standardize=False, scaler=None)
 
     # Get actuals
     actuals = df.loc[:, "actuals_0":"actuals_47"].to_numpy()
-    forecasts = forecasts.to_numpy().reshape((batch_size, n_models, 48)).swapaxes(1, 2)
+    forecasts = forecasts.to_numpy().reshape(
+        (batch_size, n_models, 48)).swapaxes(1, 2)
 
     return (inputs_cat, emb_dims), inputs, forecasts, actuals, scaler
 
@@ -71,7 +73,8 @@ class M4EnsembleData(Dataset):
                 "Only pandas DataFrame or path to a feather file legal arguments"
             )
 
-        if verbose: print(f"Loaded df of shape {meta_df.shape}")
+        if verbose:
+            print(f"Loaded df of shape {meta_df.shape}")
 
         self.h = meta_df["h"].astype(np.int16)
         self.divs = meta_df["mase_divisor"]
@@ -86,7 +89,6 @@ class M4EnsembleData(Dataset):
 
         self.num_cont = self.input.shape[1]
         self.scaler = scaler
-
 
     def __len__(self):
         return self.length
@@ -103,6 +105,7 @@ class M4EnsembleData(Dataset):
             self.h[idx],
         )
 
+
 def ensemble_loaders(
     datapath,
     splitpath=None,
@@ -115,7 +118,8 @@ def ensemble_loaders(
     standardize=False,
 ):
     cpus = cpus or cpu_count()
-    if verbose: print(f"CPU count: {cpus}")
+    if verbose:
+        print(f"CPU count: {cpus}")
 
     train_idxs, val_idxs = slice(None, None), None
 
