@@ -5,6 +5,9 @@ import pandas as pd
 def art2df(run, arts, *, root="krankile/data-processing/"):
     dfs = []
 
+    if isinstance(arts, str):
+        arts = [arts]
+
     for a in arts:
 
         data = run.use_artifact(root + a)
@@ -13,7 +16,7 @@ def art2df(run, arts, *, root="krankile/data-processing/"):
             pd.read_feather(data.file()).set_index("m4id")
         )
 
-    return dfs
+    return dfs[0] if len(arts) == 1 else dfs
 
 
 def do_standardize(data, scaler=None):
