@@ -5,7 +5,7 @@ import pandas as pd
 import torch
 from torch.utils.data import DataLoader, Dataset
 from sklearn.preprocessing import StandardScaler
-from .feature_columns import feature_columns
+from .feature_columns import cont_cols, cat_cols, all_feature_cols
 
 
 def do_standardize(data, scaler=None):
