@@ -13,6 +13,7 @@ def plot_feature_importance(
     show=True,
     normalize=False,
     figheight=12,
+    figwidth=None,
     yticksize=10,
     cols=None,
 ):
@@ -35,7 +36,7 @@ def plot_feature_importance(
         lstm_err = [v for k, v in err.items() if "lstm" in k]
         stat_err = [v for k, v in err.items() if "lstm" not in k]
 
-    plt.figure(figsize=(ps.figwidth, figheight))
+    plt.figure(figsize=(figwidth or ps.figwidth, figheight))
 
     zero = np.zeros(len(lab))
     plt.barh(lab, zero, color=main)
