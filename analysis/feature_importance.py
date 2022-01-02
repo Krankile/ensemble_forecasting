@@ -92,7 +92,12 @@ def calculate_feature_importance(
         standardize=False,
     )
 
-    (loader, emb_dims, num_cont, _,) = get_loader(datapath=data)
+    (
+        loader,
+        emb_dims,
+        num_cont,
+        _,
+    ) = get_loader(datapath=data)
 
     model = weightnets[conf.architecture](
         num_cont=num_cont,
@@ -113,19 +118,25 @@ def calculate_feature_importance(
 
     cols = (
         cols
-        or data.drop(columns=["n", "h", "mase_divisor", "naive2_smape", "naive2_mase"])
-        .loc[:, "type":"lstm_31"]
-        .columns
-    )
+        or {
+            col: col
+            for col in data.drop(
+                columns=["n", "h", "mase_divisor", "naive2_smape", "naive2_mase"]
+            )
+            .loc[:, "type":"lstm_31"]
+            .columns
+        }
+    ).items()
     it = tqdm(cols) if progress else iter(cols)
 
     results = defaultdict(list)
-    for col in it:
+    for colname, col in it:
+        print(colname, col)
         for _ in range(n_runs):
             cp = data.copy()
             cp[col] = shuffle(cp[col]).to_numpy()
 
             loader, *_ = get_loader(datapath=cp)
-            results[col].append(get_loss(model, loader, device) - baseline)
+            results[colname].append(get_loss(model, loader, device) - baseline)
 
     return results
