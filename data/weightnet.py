@@ -123,7 +123,7 @@ def ensemble_loaders(
     splitpath=None,
     batch_size=512,
     feature_set="ma",
-    model_list="all",
+    model_list=column_names.models,
     cpus=None,
     training=True,
     verbose=True,
@@ -135,9 +135,6 @@ def ensemble_loaders(
 
     train_idxs, val_idxs = slice(None, None), None
 
-    if model_list == "all":
-        model_list = column_names.models 
-    
     if splitpath:
         split = pd.read_feather(splitpath).set_index("m4id")
         train_idxs = split[split.val == False].index
