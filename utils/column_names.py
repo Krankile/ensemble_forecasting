@@ -1,4 +1,4 @@
-feature_names = ['x_acf1',
+features = ['x_acf1',
              'x_acf10',
              'diff1_acf1',
              'diff1_acf10',
@@ -73,11 +73,11 @@ feature_names = ['x_acf1',
              'lstm_30',
              'lstm_31', ]
 
-category_names = ['type', 'period']
+categories = ['type', 'period']
 
 all_features = category_names + feature_names
 
-model_names = ["auto_arima", 
+models = ["auto_arima", 
             "ets", 
             "nnetar", 
             "tbats",
