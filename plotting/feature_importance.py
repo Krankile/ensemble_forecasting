@@ -16,6 +16,7 @@ def plot_feature_importance(
     figwidth=None,
     yticksize=10,
     cols=None,
+    title="Feature importance calculations across all 76 features for validation data",
 ):
     mean_results = {k: np.mean(v) for k, v in importances.items()}
     lab, vals = zip(*sorted(mean_results.items(), key=lambda x: x[1], reverse=True))
@@ -67,7 +68,7 @@ def plot_feature_importance(
     plt.xticks(fontsize=ps.ticksize)
 
     plt.title(
-        "Feature importance calculations across all 76 features for validation data",
+        title=title,
         fontsize=ps.textsize,
     )
     plt.legend(fontsize=ps.textsize)
