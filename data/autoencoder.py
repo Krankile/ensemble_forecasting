@@ -14,10 +14,12 @@ class AutoEncoderData(Dataset):
             series = paths["series"].iloc[:nexamples, :]
             self.info = paths["info"].iloc[:nexamples, :]
         elif isinstance(paths["series"], str):
-            series = pd.read_feather(paths["series"]).set_index(
-                "m4id").iloc[:nexamples, :]
-            self.info = pd.read_feather(paths["info"]).set_index(
-                "m4id").iloc[:nexamples, :]
+            series = (
+                pd.read_feather(paths["series"]).set_index("m4id").iloc[:nexamples, :]
+            )
+            self.info = (
+                pd.read_feather(paths["info"]).set_index("m4id").iloc[:nexamples, :]
+            )
         else:
             raise Exception("Invalid type of data")
 
@@ -39,7 +41,7 @@ class AutoEncoderData(Dataset):
 
         for i, (l, s) in enumerate(zip(self.lens, series)):
             l = min(mlen, l)
-            s = s[max(0, l-mlen):l].reshape((-1, 1))
+            s = s[max(0, l - mlen) : l].reshape((-1, 1))
             data[i, :l] = norm()(s)
 
         return data
@@ -61,16 +63,34 @@ def autoencoder_loaders(run, paths1, paths2=None, cpus=None, batchsize=None):
     print(f"Using {cpus} CPUs in dataloaders")
     seq_len, num_features = conf.maxlen, 1
 
-    data1 = AutoEncoderData(paths1, maxlen=conf.maxlen,
-                            nexamples=conf.get("n_train"), normalize=conf.normalize_data)
-    loader1 = DataLoader(data1, batch_size=(batchsize or conf.batch_size),
-                         shuffle=True, num_workers=cpus, pin_memory=True)
+    data1 = AutoEncoderData(
+        paths1,
+        maxlen=conf.maxlen,
+        nexamples=conf.get("n_train"),
+        normalize=conf.normalize_data,
+    )
+    loader1 = DataLoader(
+        data1,
+        batch_size=(batchsize or conf.batch_size),
+        shuffle=True,
+        num_workers=cpus,
+        pin_memory=True,
+    )
 
     if paths2:
         data2 = AutoEncoderData(
-            paths2, maxlen=conf.maxlen, nexamples=conf.get("n_val"), normalize=conf.normalize_data)
-        loader2 = DataLoader(data2, batch_size=(batchsize or conf.batch_size),
-                             shuffle=False, num_workers=cpus, pin_memory=True)
+            paths2,
+            maxlen=conf.maxlen,
+            nexamples=conf.get("n_val"),
+            normalize=conf.normalize_data,
+        )
+        loader2 = DataLoader(
+            data2,
+            batch_size=(batchsize or conf.batch_size),
+            shuffle=False,
+            num_workers=cpus,
+            pin_memory=True,
+        )
         return loader1, loader2, seq_len, num_features
 
     return loader1, seq_len, num_features

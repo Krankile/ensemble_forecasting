@@ -12,9 +12,7 @@ def art2df(run, arts, *, root="krankile/data-processing/"):
 
         data = run.use_artifact(root + a)
         data.download()
-        dfs.append(
-            pd.read_feather(data.file()).set_index("m4id")
-        )
+        dfs.append(pd.read_feather(data.file()).set_index("m4id"))
 
     return dfs[0] if len(arts) == 1 else dfs
 

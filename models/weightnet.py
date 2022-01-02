@@ -3,9 +3,19 @@ from torch import nn
 
 from ..utils import activations
 
-class WeightNetV3(nn.Module):
 
-    def __init__(self, num_cont, out_size, n_hidden, hidden_dim, dropout, bn, activation, emb_dims):
+class WeightNetV3(nn.Module):
+    def __init__(
+        self,
+        num_cont,
+        out_size,
+        n_hidden,
+        hidden_dim,
+        dropout,
+        bn,
+        activation,
+        emb_dims,
+    ):
         super().__init__()
 
         self.embeddings = nn.ModuleList([nn.Embedding(x, y) for x, y in emb_dims])
@@ -18,9 +28,9 @@ class WeightNetV3(nn.Module):
 
         for i in range(n_hidden):
             layers.extend(
-                [nn.Dropout(p=dropout)]
-                +[nn.BatchNorm1d(hidden_dim)] if bn else []
-                +[activations[activation]()]
+                [nn.Dropout(p=dropout)] + [nn.BatchNorm1d(hidden_dim)]
+                if bn
+                else [] + [activations[activation]()]
             )
             if i == (n_hidden - 1):
                 layers.append(nn.Linear(hidden_dim, out_size))
@@ -35,16 +45,25 @@ class WeightNetV3(nn.Module):
         x = torch.cat(x, 1)
 
         cont = self.first_bn(cont)
-        
-        x = torch.cat([x, cont], 1) 
+
+        x = torch.cat([x, cont], 1)
         x = self.fc(x)
         x = self.softmax(x)
         return x
 
 
 class WeightNetV4(nn.Module):
-
-    def __init__(self, num_cont, out_size, n_hidden, hidden_dim, dropout, bn, activation, emb_dims):
+    def __init__(
+        self,
+        num_cont,
+        out_size,
+        n_hidden,
+        hidden_dim,
+        dropout,
+        bn,
+        activation,
+        emb_dims,
+    ):
         super().__init__()
 
         self.embeddings = nn.ModuleList([nn.Embedding(x, y) for x, y in emb_dims])
@@ -57,9 +76,9 @@ class WeightNetV4(nn.Module):
 
         for i in range(n_hidden):
             layers.extend(
-                [nn.Dropout(p=dropout)]
-                +[nn.BatchNorm1d(hidden_dim)] if bn else []
-                +[activations[activation]()]
+                [nn.Dropout(p=dropout)] + [nn.BatchNorm1d(hidden_dim)]
+                if bn
+                else [] + [activations[activation]()]
             )
             if i == (n_hidden - 1):
                 layers.append(nn.Linear(hidden_dim, out_size))
@@ -74,8 +93,8 @@ class WeightNetV4(nn.Module):
         x = torch.cat(x, 1)
 
         cont = self.first_cont(cont)
-        
-        x = torch.cat([x, cont], 1) 
+
+        x = torch.cat([x, cont], 1)
         x = self.fc(x)
         x = self.softmax(x)
         return x

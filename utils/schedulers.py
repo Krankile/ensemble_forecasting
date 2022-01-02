@@ -4,6 +4,7 @@ from torch.optim import lr_scheduler
 def schedule_noop(*_, **__):
     pass
 
+
 schedule_noop.step = lambda *_, **__: None
 
 schedulers = {

@@ -50,15 +50,22 @@ def feature_extractor(df, feature_set, n_models, standardize=False, scaler=None)
 
     # Get actuals
     actuals = df.loc[:, "actuals_0":"actuals_47"].to_numpy()
-    forecasts = forecasts.to_numpy().reshape(
-        (batch_size, n_models, 48)).swapaxes(1, 2)
+    forecasts = forecasts.to_numpy().reshape((batch_size, n_models, 48)).swapaxes(1, 2)
 
     return (inputs_cat, emb_dims), inputs, forecasts, actuals, scaler
 
 
 class M4EnsembleData(Dataset):
-
-    def __init__(self, meta_path, feature_set, n_models, subset=None, verbose=True, standardize=False, scaler=None):
+    def __init__(
+        self,
+        meta_path,
+        feature_set,
+        n_models,
+        subset=None,
+        verbose=True,
+        standardize=False,
+        scaler=None,
+    ):
         if isinstance(meta_path, pd.DataFrame):
             meta_df = meta_path.copy()
         elif isinstance(meta_path, str):
@@ -84,8 +91,15 @@ class M4EnsembleData(Dataset):
         self.index = meta_df.index.values
         self.length = meta_df.shape[0]
 
-        (self.cats, self.emb_dims), self.input, self.forecast, self.actuals, scaler = feature_extractor(
-            meta_df, feature_set, n_models, standardize=standardize, scaler=scaler)
+        (
+            (self.cats, self.emb_dims),
+            self.input,
+            self.forecast,
+            self.actuals,
+            scaler,
+        ) = feature_extractor(
+            meta_df, feature_set, n_models, standardize=standardize, scaler=scaler
+        )
 
         self.num_cont = self.input.shape[1]
         self.scaler = scaler
@@ -128,16 +142,34 @@ def ensemble_loaders(
         train_idxs = split[split.val == False].index
         val_idxs = split[split.val == True].index
 
-    data1 = M4EnsembleData(datapath, feature_set, n_models,
-                           subset=train_idxs, verbose=verbose, standardize=standardize)
-    loader1 = DataLoader(data1, batch_size=batch_size,
-                         shuffle=training, num_workers=cpus, drop_last=training)
+    data1 = M4EnsembleData(
+        datapath,
+        feature_set,
+        n_models,
+        subset=train_idxs,
+        verbose=verbose,
+        standardize=standardize,
+    )
+    loader1 = DataLoader(
+        data1,
+        batch_size=batch_size,
+        shuffle=training,
+        num_workers=cpus,
+        drop_last=training,
+    )
 
     if val_idxs is not None:
         data2 = M4EnsembleData(
-            datapath, feature_set, n_models, subset=val_idxs, verbose=verbose, scaler=data1.scaler)
-        loader2 = DataLoader(data2, batch_size=batch_size,
-                             shuffle=False, num_workers=cpus)
+            datapath,
+            feature_set,
+            n_models,
+            subset=val_idxs,
+            verbose=verbose,
+            scaler=data1.scaler,
+        )
+        loader2 = DataLoader(
+            data2, batch_size=batch_size, shuffle=False, num_workers=cpus
+        )
 
         return loader1, loader2, data1.emb_dims, data1.num_cont, data1.length
 
@@ -145,24 +177,21 @@ def ensemble_loaders(
 
 
 def ensemble_loaders_kfold(
-    data,
-    val,
-    batch_size=512,
-    feature_set="ma",
-    n_models=9,
-    cpus=None,
-    training=True,
+    data, val, batch_size=512, feature_set="ma", n_models=9, cpus=None, training=True,
 ):
     cpus = cpus or cpu_count()
     print(f"CPU count: {cpus}")
 
     data1 = M4EnsembleData(data, feature_set, n_models)
-    loader1 = DataLoader(data1, batch_size=batch_size,
-                         shuffle=training, num_workers=cpus, drop_last=training)
+    loader1 = DataLoader(
+        data1,
+        batch_size=batch_size,
+        shuffle=training,
+        num_workers=cpus,
+        drop_last=training,
+    )
 
-    data2 = M4EnsembleData(
-        val, feature_set, n_models)
-    loader2 = DataLoader(data2, batch_size=batch_size,
-                         shuffle=False, num_workers=cpus)
+    data2 = M4EnsembleData(val, feature_set, n_models)
+    loader2 = DataLoader(data2, batch_size=batch_size, shuffle=False, num_workers=cpus)
 
     return loader1, loader2, data1.emb_dims, data1.num_cont, data1.length

@@ -21,12 +21,19 @@ def get_data(run, test, final=None):
 
         if final:
             test = run.use_artifact(
-                "krankile/data-processing/ensemble_standarized_test:len-500")
+                "krankile/data-processing/ensemble_standarized_test:len-500"
+            )
             test.download()
             test = pd.read_feather(test.file()).set_index("m4id")
         else:
             data, split, test = art2df(
-                run, ["ensemble_traval:len-500", "traval_split_80_20:v0", "ensemble_test:v5"])
+                run,
+                [
+                    "ensemble_traval:len-500",
+                    "traval_split_80_20:v0",
+                    "ensemble_test:v5",
+                ],
+            )
             tra, val = split_traval(data, split)
 
             feat_cols = data.loc[:, "x_acf1":"lstm_31"].columns
@@ -54,10 +61,10 @@ def get_loss(model, loader, device, loss="owa"):
     with torch.no_grad():
         owas = []
         for tensors in loader:
-            cats, inputs, forecasts, actuals, * \
-                loss_args = map(lambda x: x.to(device), tensors)
-            inputs, forecasts = inputs.to(
-                torch.float32), forecasts.to(torch.float32)
+            cats, inputs, forecasts, actuals, *loss_args = map(
+                lambda x: x.to(device), tensors
+            )
+            inputs, forecasts = inputs.to(torch.float32), forecasts.to(torch.float32)
 
             y_pred = model(cats, inputs).unsqueeze(2)
             prediction = torch.matmul(forecasts, y_pred).squeeze(2)
@@ -68,23 +75,24 @@ def get_loss(model, loader, device, loss="owa"):
     return np.mean(owas)
 
 
-def calculate_feature_importance(*, run, device, test, final, modelpath, n_runs=1, progress=True):
+def calculate_feature_importance(
+    *, run, device, test, final, modelpath, n_runs=1, cols=None, progress=True
+):
     conf = run.config
 
     data = get_data(run, test=test, final=final)
 
-    get_loader = partial(ensemble_loaders,
-                         batch_size=data.shape[0],
-                         feature_set=conf.feature_set,
-                         n_models=conf.num_models,
-                         training=False, verbose=False,
-                         standardize=False,
-                         )
+    get_loader = partial(
+        ensemble_loaders,
+        batch_size=data.shape[0],
+        feature_set=conf.feature_set,
+        n_models=conf.num_models,
+        training=False,
+        verbose=False,
+        standardize=False,
+    )
 
-    (loader,
-     emb_dims,
-     num_cont,
-     _,) = get_loader(datapath=data)
+    (loader, emb_dims, num_cont, _,) = get_loader(datapath=data)
 
     model = weightnets[conf.architecture](
         num_cont=num_cont,
@@ -103,8 +111,12 @@ def calculate_feature_importance(*, run, device, test, final, modelpath, n_runs=
     # Run calculations
     baseline = get_loss(model, loader, device)
 
-    cols = data.drop(columns=['n', 'h', 'mase_divisor', 'naive2_smape',
-                     'naive2_mase']).loc[:, "type":"lstm_31"].columns
+    cols = (
+        cols
+        or data.drop(columns=["n", "h", "mase_divisor", "naive2_smape", "naive2_mase"])
+        .loc[:, "type":"lstm_31"]
+        .columns
+    )
     it = tqdm(cols) if progress else iter(cols)
 
     results = defaultdict(list)
