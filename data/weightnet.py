@@ -6,6 +6,7 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 from sklearn.preprocessing import StandardScaler
 from .feature_columns import cont_cols, cat_cols, all_feature_cols
+from ..utils import column_names
 
 
 def do_standardize(data, scaler=None):
@@ -137,6 +138,7 @@ def ensemble_loaders(
 
     if model_list == "all":
         model_list = column_names.models 
+    
     if splitpath:
         split = pd.read_feather(splitpath).set_index("m4id")
         train_idxs = split[split.val == False].index
@@ -144,7 +146,7 @@ def ensemble_loaders(
 
     data1 = M4EnsembleData(datapath, feature_set, model_list,
                            subset=train_idxs, verbose=verbose, standardize=standardize)
-                           
+
     loader1 = DataLoader(data1, batch_size=batch_size,
                          shuffle=training, num_workers=cpus, drop_last=training)
 
