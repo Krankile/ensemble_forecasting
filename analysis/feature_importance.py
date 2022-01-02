@@ -131,7 +131,6 @@ def calculate_feature_importance(
 
     results = defaultdict(list)
     for colname, col in it:
-        print(colname, col)
         for _ in range(n_runs):
             cp = data.copy()
             cp[col] = shuffle(cp[col]).to_numpy()
