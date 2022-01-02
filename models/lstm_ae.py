@@ -3,7 +3,6 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 
 class EncoderV2(nn.Module):
-
     def __init__(self, seq_len, n_features, embedding_dim, hidden_dim, dropout):
         super().__init__()
 
@@ -30,18 +29,15 @@ class EncoderV2(nn.Module):
 
     def forward(self, x):
         x, (_, _) = self.lstm1(x)
-        x, lens = pad_packed_sequence(
-            x, batch_first=True, total_length=self.seq_len)
+        x, lens = pad_packed_sequence(x, batch_first=True, total_length=self.seq_len)
         x = self.drop1(x)
-        x = pack_padded_sequence(
-            x, lens, batch_first=True, enforce_sorted=False)
+        x = pack_padded_sequence(x, lens, batch_first=True, enforce_sorted=False)
         x, (hidden_n, _) = self.lstm2(x)
 
         return hidden_n.reshape((-1, self.n_features, self.embedding_dim)), lens
 
 
 class DecoderV2(nn.Module):
-
     def __init__(self, seq_len, input_dim, hidden_dim, n_features):
         super().__init__()
 
@@ -51,17 +47,14 @@ class DecoderV2(nn.Module):
         self.n_features = n_features
 
         self.rnn1 = nn.LSTM(
-            input_size=input_dim,
-            hidden_size=input_dim,
-            num_layers=1,
-            batch_first=True
+            input_size=input_dim, hidden_size=input_dim, num_layers=1, batch_first=True
         )
 
         self.rnn2 = nn.LSTM(
             input_size=input_dim,
             hidden_size=self.hidden_dim,
             num_layers=1,
-            batch_first=True
+            batch_first=True,
         )
 
         self.output_layer = nn.Linear(self.hidden_dim, n_features)
@@ -69,27 +62,24 @@ class DecoderV2(nn.Module):
     def forward(self, x, lens):
         x = x.repeat(1, self.seq_len, 1)
 
-        x = pack_padded_sequence(
-            x, lens, batch_first=True, enforce_sorted=False)
+        x = pack_padded_sequence(x, lens, batch_first=True, enforce_sorted=False)
 
         x, (_, _) = self.rnn1(x)
         x, (_, _) = self.rnn2(x)
-        x, lens = pad_packed_sequence(
-            x, batch_first=True, total_length=self.seq_len)
+        x, lens = pad_packed_sequence(x, batch_first=True, total_length=self.seq_len)
         x = x.reshape((-1, self.seq_len, self.hidden_dim))
 
         return self.output_layer(x)
 
 
 class RecurrentAutoencoderV2(nn.Module):
-
     def __init__(self, seq_len, n_features, embedding_dim, hidden_dim, dropout):
         super().__init__()
 
         self.encoder = EncoderV2(
-            seq_len, n_features, embedding_dim, hidden_dim, dropout)
-        self.decoder = DecoderV2(
-            seq_len, embedding_dim, hidden_dim, n_features)
+            seq_len, n_features, embedding_dim, hidden_dim, dropout
+        )
+        self.decoder = DecoderV2(seq_len, embedding_dim, hidden_dim, n_features)
 
     def forward(self, x):
 
@@ -100,7 +90,6 @@ class RecurrentAutoencoderV2(nn.Module):
 
 
 class EncoderV3(nn.Module):
-
     def __init__(self, seq_len, n_features, embedding_dim, hidden_dim, dropout):
         super().__init__()
 
@@ -124,7 +113,6 @@ class EncoderV3(nn.Module):
 
 
 class DecoderV3(nn.Module):
-
     def __init__(self, seq_len, input_dim, hidden_dim, n_features):
         super().__init__()
 
@@ -143,22 +131,20 @@ class DecoderV3(nn.Module):
 
     def forward(self, x, lens):
         x = x.repeat(1, self.seq_len, 1)
-        x = pack_padded_sequence(
-            x, lens, batch_first=True, enforce_sorted=False)
+        x = pack_padded_sequence(x, lens, batch_first=True, enforce_sorted=False)
         x, _ = self.lstm1(x)
 
         return x
 
 
 class RecurrentAutoencoderV3(nn.Module):
-
     def __init__(self, seq_len, n_features, embedding_dim, hidden_dim, dropout):
         super().__init__()
 
-        self.encoder = EncoderV3(seq_len, n_features,
-                                 embedding_dim, hidden_dim, dropout)
-        self.decoder = DecoderV3(
-            seq_len, embedding_dim, hidden_dim, n_features)
+        self.encoder = EncoderV3(
+            seq_len, n_features, embedding_dim, hidden_dim, dropout
+        )
+        self.decoder = DecoderV3(seq_len, embedding_dim, hidden_dim, n_features)
 
     def forward(self, x, lens):
 
@@ -169,8 +155,9 @@ class RecurrentAutoencoderV3(nn.Module):
 
 
 class EncoderV4(nn.Module):
-
-    def __init__(self, seq_len, n_features, embedding_dim, hidden_dim, dropout, num_layers):
+    def __init__(
+        self, seq_len, n_features, embedding_dim, hidden_dim, dropout, num_layers
+    ):
         super().__init__()
 
         self.seq_len = seq_len
@@ -194,7 +181,6 @@ class EncoderV4(nn.Module):
 
 
 class DecoderV4(nn.Module):
-
     def __init__(self, seq_len, input_dim, hidden_dim, n_features, num_layers):
         super().__init__()
 
@@ -214,22 +200,24 @@ class DecoderV4(nn.Module):
 
     def forward(self, x, lens):
         x = x.repeat(1, self.seq_len, 1)
-        x = pack_padded_sequence(
-            x, lens, batch_first=True, enforce_sorted=False)
+        x = pack_padded_sequence(x, lens, batch_first=True, enforce_sorted=False)
         x, _ = self.lstm1(x)
 
         return x
 
 
 class RecurrentAutoencoderV4(nn.Module):
-
-    def __init__(self, seq_len, n_features, embedding_dim, hidden_dim, dropout, num_layers):
+    def __init__(
+        self, seq_len, n_features, embedding_dim, hidden_dim, dropout, num_layers
+    ):
         super().__init__()
 
-        self.encoder = EncoderV4(seq_len, n_features,
-                                 embedding_dim, hidden_dim, dropout, num_layers)
+        self.encoder = EncoderV4(
+            seq_len, n_features, embedding_dim, hidden_dim, dropout, num_layers
+        )
         self.decoder = DecoderV4(
-            seq_len, embedding_dim, hidden_dim, n_features, num_layers)
+            seq_len, embedding_dim, hidden_dim, n_features, num_layers
+        )
 
     def forward(self, x, lens):
 
