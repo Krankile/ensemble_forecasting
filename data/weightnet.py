@@ -5,7 +5,6 @@ import pandas as pd
 import torch
 from torch.utils.data import DataLoader, Dataset
 from sklearn.preprocessing import StandardScaler
-from .feature_columns import cont_cols, cat_cols, all_feature_cols
 from ..utils import column_names
 
 
