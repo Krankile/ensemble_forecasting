@@ -41,7 +41,9 @@ def plot_feature_importance(
     plt.barh(lab, zero, color=main)
 
     if cols:
-        plt.barh(y=lab, width=vals, alpha=1, color=main, xerr=err, label="Clusters")
+        plt.barh(
+            y=lab, width=vals, alpha=1, color=main, xerr=err.values(), label="Clusters"
+        )
     else:
 
         plt.barh(
