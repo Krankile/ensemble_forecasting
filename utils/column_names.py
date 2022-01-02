@@ -75,7 +75,7 @@ features = ['x_acf1',
 
 categories = ['type', 'period']
 
-all_features = category_names + feature_names
+all_features = categories + features
 
 models = ["auto_arima", 
             "ets", 
