@@ -68,7 +68,7 @@ def plot_feature_importance(
     plt.xticks(fontsize=ps.ticksize)
 
     plt.title(
-        title=title,
+        title,
         fontsize=ps.textsize,
     )
     plt.legend(fontsize=ps.textsize)
