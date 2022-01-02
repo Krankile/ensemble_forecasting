@@ -63,9 +63,16 @@ def feature_extractor(df, feature_set, model_list, standardize=False, scaler=Non
 
 class M4EnsembleData(Dataset):
 
-    def __init__(self, meta_path, feature_set, model_list, subset=None, verbose=True, standardize=False, scaler=None):
+    def __init__(self, meta_path, feature_set, 
+                model_list, 
+                subset=None,
+                verbose=True, 
+                standardize=False, 
+                scaler=None):
+        
         if isinstance(meta_path, pd.DataFrame):
             meta_df = meta_path.copy()
+        
         elif isinstance(meta_path, str):
             meta_df = (
                 pd.read_feather(meta_path)
@@ -137,8 +144,7 @@ def ensemble_loaders(
 
     data1 = M4EnsembleData(datapath, feature_set, model_list,
                            subset=train_idxs, verbose=verbose, standardize=standardize)
-    print(data1)
-    print(data1.length)
+                           
     loader1 = DataLoader(data1, batch_size=batch_size,
                          shuffle=training, num_workers=cpus, drop_last=training)
 
