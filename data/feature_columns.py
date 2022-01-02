@@ -1,4 +1,4 @@
-cont_cols = [
+stats_cols = [
     "x_acf1",
     "x_acf10",
     "diff1_acf1",
@@ -41,6 +41,9 @@ cont_cols = [
     "unitroot_kpss",
     "unitroot_pp",
     "series_length",
+]
+
+lstm_cols = [
     "lstm_0",
     "lstm_1",
     "lstm_2",
@@ -76,5 +79,7 @@ cont_cols = [
 ]
 
 cat_cols = ["type", "period"]
+
+cont_cols = stats_cols + lstm_cols
 
 all_feature_cols = cat_cols + cont_cols
