@@ -18,8 +18,7 @@ def plot_feature_importance(
     cols=None,
 ):
     mean_results = {k: np.mean(v) for k, v in importances.items()}
-    sorted_results = sorted(mean_results.items(), key=lambda x: x[1], reverse=True)
-    lab, vals = zip(*sorted_results)
+    lab, vals = zip(*sorted(mean_results.items(), key=lambda x: x[1], reverse=True))
     vals = np.array(vals)
 
     if normalize:
@@ -29,9 +28,11 @@ def plot_feature_importance(
     stat_err = None
     if useerror is not None:
         if useerror == "sd":
-            err = {k: np.std(v) for k, v in importances.items()}
+            err = {k: np.std(importances[k]) for k in lab}
         elif useerror == "se":
-            err = {k: np.std(v) / np.sqrt(len(v)) for k, v in importances.items()}
+            err = {
+                k: np.std(importances[k]) / np.sqrt(len(importances[k])) for k in lab
+            }
 
         lstm_err = [v for k, v in err.items() if "lstm" in k]
         stat_err = [v for k, v in err.items() if "lstm" not in k]
@@ -46,7 +47,6 @@ def plot_feature_importance(
             y=lab, width=vals, alpha=1, color=main, xerr=err.values(), label="Clusters"
         )
     else:
-
         plt.barh(
             *zip(*filter(lambda x: "lstm" in x[0], zip(lab, vals))),
             alpha=1,
