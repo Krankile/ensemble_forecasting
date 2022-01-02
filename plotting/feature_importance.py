@@ -13,7 +13,8 @@ def plot_feature_importance(
     show=True,
     normalize=False,
     figheight=12,
-    yticksize=10
+    yticksize=10,
+    cols=None,
 ):
     mean_results = {k: np.mean(v) for k, v in importances.items()}
     sorted_results = sorted(mean_results.items(), key=lambda x: x[1], reverse=True)
@@ -39,20 +40,26 @@ def plot_feature_importance(
     zero = np.zeros(len(lab))
     plt.barh(lab, zero, color=main)
 
-    plt.barh(
-        *zip(*filter(lambda x: "lstm" in x[0], zip(lab, vals))),
-        alpha=1,
-        color=main,
-        xerr=lstm_err,
-        label="LSTM AE features"
-    )
-    plt.barh(
-        *zip(*filter(lambda x: "lstm" not in x[0], zip(lab, vals))),
-        alpha=1,
-        color=main2,
-        xerr=stat_err,
-        label="Statistical features"
-    )
+    if cols:
+        plt.barh(
+            y=lab, width=vals, alpha=1, color=main, xerr=err.values(), label="Clusters"
+        )
+    else:
+
+        plt.barh(
+            *zip(*filter(lambda x: "lstm" in x[0], zip(lab, vals))),
+            alpha=1,
+            color=main,
+            xerr=lstm_err,
+            label="LSTM AE features",
+        )
+        plt.barh(
+            *zip(*filter(lambda x: "lstm" not in x[0], zip(lab, vals))),
+            alpha=1,
+            color=main2,
+            xerr=stat_err,
+            label="Statistical features",
+        )
 
     plt.xlabel("OWA loss relative to baseline", fontsize=ps.textsize)
     plt.yticks(fontsize=yticksize)
