@@ -1,4 +1,6 @@
-# ensemble-forecasting
+# Ensemble forecasting and the M4 competition
+
+> Ankile, L.L. and Krange, K. (2021)
 
 This project is part of the master thesis of Lars Lien Ankile and Kjartan Krange.
 
